@@ -30,13 +30,18 @@ let askAboutCodeSection;
 let questionForm;
 let codeQuestion;
 let answerCard;
-let answerContent;
 let sendQuestionBtn;
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeElements();
   initializeMermaid();
   initializeHighlightjs();
+
+  // Add event listener for the clear chat button
+  const clearChatBtn = document.getElementById('clearChatBtn');
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener('click', clearChatMessages);
+  }
 });
 
 /**
@@ -107,6 +112,14 @@ function initializeElements() {
 
   if (codeQuestion) {
     codeQuestion.addEventListener('input', validateQuestionForm);
+    codeQuestion.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Prevent the default Enter behavior (new line)
+        if (validateQuestionForm()) {
+          questionForm.dispatchEvent(new Event('submit')); // Trigger the form submission
+        }
+      }
+    });
   }
 
   if (repoSelect) {
@@ -124,10 +137,32 @@ function initializeElements() {
       }
 
       validateQuestionForm();
+      clearChatMessages();
     });
   }
 
   validateQuestionForm();
+}
+
+/**
+ * Clears the chat messages
+ */
+function clearChatMessages() {
+  const chatMessages = document.getElementById('chatMessages');
+  if (chatMessages) {
+    chatMessages.innerHTML = ''; // Clear all messages from the chat
+    // Add the default bot message
+    const botMessageDiv = document.createElement('div');
+    botMessageDiv.classList.add('message', 'ai-message', 'flex', 'items-start');
+    botMessageDiv.innerHTML = `
+                  ${MessageAvatar({ type: 'ai' })}
+                  ${MessageContent({
+                    type: 'ai',
+                    content: 'What would you like to know about the code?',
+                  })}
+                  `;
+    chatMessages.appendChild(botMessageDiv);
+  }
 }
 
 function initializeMermaid() {
@@ -227,7 +262,7 @@ async function handleAnalyzeRepo() {
 
   try {
     // Show loading indicator
-    showLoading();
+    showLoading('Analyzing code, please wait...');
 
     const queryParams = new URLSearchParams({
       analysisType: analysisTypeValue,
@@ -308,8 +343,18 @@ function handleQuestionSubmit(event) {
     return;
   }
 
-  // Show loading indicator
-  showLoading();
+  // Get the question from the input
+  const questionText = codeQuestion.value.trim();
+
+  // Append the user's message to the chat container
+  appendUserMessage(questionText);
+
+  // Clear the input field
+  codeQuestion.value = '';
+
+  // Append the "Analyzing code..." message from the bot
+  const analyzingMessage = appendAnalyzingMessage();
+  showAnalyzingMessage();
 
   // Hide previous results
   hideResults();
@@ -323,7 +368,7 @@ function handleQuestionSubmit(event) {
     repoUrl,
     githubToken,
     codePath,
-    question: codeQuestion.value.trim(),
+    question: questionText, // Use the question text from the input
   });
 
   fetch(
@@ -337,6 +382,10 @@ function handleQuestionSubmit(event) {
   )
     .then(handleApiResponse)
     .then((data) => {
+      // Remove the "Analyzing code..." message
+      analyzingMessage.remove();
+      hideAnalyzingMessage();
+
       // Display the answer
       displayAnswer(data.answer);
     })
@@ -345,20 +394,89 @@ function handleQuestionSubmit(event) {
       showError(
         error.message || 'An error occurred while processing your question.',
       );
+      // Remove the "Analyzing code..." message on error
+      analyzingMessage.remove();
+      hideAnalyzingMessage();
     })
     .finally(() => {
-      hideLoading();
+      // hideLoading();
     });
 }
 
 /**
- * Displays the answer to a code question
+ * Appends a user message to the chat container
  */
+function appendUserMessage(message) {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+
+  const userMessageDiv = document.createElement('div');
+  userMessageDiv.classList.add(
+    'message',
+    'user-message',
+    'flex',
+    'items-start',
+  );
+  userMessageDiv.innerHTML = `
+                  ${MessageAvatar({ type: 'user' })}
+                  ${MessageContent({ type: 'user', content: message })}
+                  `;
+
+  chatMessages.appendChild(userMessageDiv);
+
+  // Scroll to the bottom of the chat messages
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Appends a "Analyzing code..." message from the bot to the chat container
+ */
+function appendAnalyzingMessage() {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+
+  const analyzingMessageDiv = document.createElement('div');
+  analyzingMessageDiv.classList.add(
+    'message',
+    'ai-message',
+    'flex',
+    'items-start',
+  );
+  analyzingMessageDiv.innerHTML = `
+                  ${MessageAvatar({ type: 'ai' })}
+                  ${MessageContent({
+                    type: 'ai',
+                    content: 'Analyzing code, please wait...',
+                  })}
+                  `;
+
+  chatMessages.appendChild(analyzingMessageDiv);
+
+  // Scroll to the bottom of the chat messages
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  return analyzingMessageDiv;
+}
+
+/**
+ * Shows the analyzing message
+ */
+function showAnalyzingMessage() {
+  if (sendQuestionBtn) sendQuestionBtn.disabled = true;
+}
+
+/**
+ * Hides the analyzing message
+ */
+function hideAnalyzingMessage() {
+  if (sendQuestionBtn) sendQuestionBtn.disabled = false;
+}
+
 /**
  * Displays the answer to a code question with Markdown formatting
  */
 function displayAnswer(answer) {
-  if (!answerCard || !answerContent) return;
+  // if (!answerCard || !answerContent) return;
 
   // Configure marked options
   marked.setOptions({
@@ -386,8 +504,8 @@ function displayAnswer(answer) {
     // Convert markdown to HTML
     const htmlContent = marked.parse(answer);
 
-    // Set the HTML content
-    answerContent.innerHTML = htmlContent;
+    // Append the bot's answer to the chat container
+    appendBotMessage(htmlContent);
 
     // Initialize syntax highlighting on all code blocks
     if (typeof hljs !== 'undefined') {
@@ -396,14 +514,39 @@ function displayAnswer(answer) {
       });
     }
 
-    // Show the answer card
-    answerCard.classList.remove('d-none');
+    // // Show the answer card
+    // answerCard.classList.remove('d-none');
   } catch (error) {
     console.error('Error rendering markdown:', error);
     // Fallback to basic formatting if markdown parsing fails
-    answerContent.innerHTML = `<p>${answer.replace(/\n/g, '<br>')}</p>`;
-    answerCard.classList.remove('d-none');
+    // answerContent.innerHTML = `<p>${answer.replace(/\n/g, '<br>')}</p>`;
+    appendBotMessage(`<p>${answer.replace(/\n/g, '<br>')}</p>`);
+    // answerCard.classList.remove('d-none');
   }
+}
+
+/**
+ * Appends a bot message to the chat container
+ */
+function appendBotMessage(message) {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+
+  const botMessageDiv = document.createElement('div');
+  botMessageDiv.classList.add('message', 'ai-message', 'flex', 'items-start');
+
+  // Convert markdown to HTML
+  const htmlContent = marked.parse(message);
+
+  botMessageDiv.innerHTML = `
+                  ${MessageAvatar({ type: 'ai' })}
+                  ${MessageContent({ type: 'ai', content: htmlContent })}
+                  `;
+
+  chatMessages.appendChild(botMessageDiv);
+
+  // Scroll to the bottom of the chat messages
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 /**
@@ -486,7 +629,7 @@ if (code && !githubToken) {
 // Function to send the code to the backend
 async function sendCodeToBackend(code) {
   try {
-    showLoading();
+    showLoading('Connecting to GitHub...');
     const response = await fetch(
       `${window.APP_CONFIG.API_URL}/github/connect`,
       {
@@ -560,7 +703,7 @@ async function loadRepositories() {
   let url = `${window.APP_CONFIG.API_URL}/github/repos`;
 
   try {
-    showLoading();
+    showLoading('Loading repositories...');
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -624,12 +767,54 @@ document.getElementById('logout-btn').addEventListener('click', function () {
 /**
  * Shows the loading indicator
  */
-function showLoading() {
-  if (loadingIndicator) loadingIndicator.classList.remove('d-none');
+function showLoading(message = 'Analyzing code, please wait...') {
+  const loadingModal = new bootstrap.Modal(
+    document.getElementById('loadingModal'),
+  );
+  const loadingMessageElement = document.getElementById('loadingMessage');
+  if (loadingMessageElement) {
+    loadingMessageElement.textContent = message;
+  }
+  loadingModal.show();
+
   if (analyzeRepoBtn) analyzeRepoBtn.disabled = true;
   if (sendQuestionBtn) sendQuestionBtn.disabled = true;
 
   hideResults();
+}
+
+/**
+ * Hides the loading indicator
+ */
+function hideLoading() {
+  const loadingModalElement = document.getElementById('loadingModal');
+  const loadingModal = bootstrap.Modal.getInstance(loadingModalElement);
+
+  if (loadingModal) {
+    loadingModal.hide();
+    loadingModalElement.addEventListener(
+      'hidden.bs.modal',
+      () => {
+        // Remove the backdrop element
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+          backdrop.remove();
+        }
+        // Remove the 'modal-open' class from the body
+        document.body.classList.remove('modal-open');
+        document.body.style.paddingRight = '';
+        document.body.style.overflow = 'auto';
+      },
+      { once: true },
+    );
+  } else {
+    document.body.classList.remove('modal-open');
+    document.body.style.paddingRight = '';
+  }
+
+  if (analyzeRepoBtn) analyzeRepoBtn.disabled = !repoSelect.value;
+
+  validateQuestionForm();
 }
 
 /**
@@ -641,20 +826,11 @@ function hideResults() {
 }
 
 /**
- * Hides the loading indicator
- */
-function hideLoading() {
-  if (loadingIndicator) loadingIndicator.classList.add('d-none');
-  if (analyzeRepoBtn) analyzeRepoBtn.disabled = !repoSelect.value;
-
-  validateQuestionForm();
-}
-
-/**
  * Sends analysis request to the backend
  */
 function sendAnalysisRequest(queryParams) {
   hideError();
+  showLoading('Analyzing code, please wait...');
 
   fetch(
     `${window.APP_CONFIG.API_URL}/ai-code-analyzer/diagrams?${queryParams.toString()}`,
@@ -701,4 +877,28 @@ function validateQuestionForm() {
     repoSelect.value !== '';
   sendQuestionBtn.disabled = !isValid;
   return isValid;
+}
+
+function MessageContent({ type, content }) {
+  const isAiMessage = type === 'ai';
+  const contentClass = isAiMessage ? 'markdown-body' : '';
+
+  return `
+    <div class="message-content">
+      <div class="${contentClass}">${content}</div>
+    </div>
+  `;
+}
+
+function MessageAvatar({ type }) {
+  const isUser = type === 'user';
+  const avatarSVG = isUser
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user h-4 w-4" data-darkreader-inline-stroke="" style="--darkreader-inline-stroke: currentColor;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot h-4 w-4 mr-2" data-darkreader-inline-stroke="" style="--darkreader-inline-stroke: currentColor;"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>`;
+
+  return `
+    <div class="message-avatar">
+      ${avatarSVG}
+    </div>
+  `;
 }

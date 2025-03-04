@@ -26,6 +26,7 @@ export class AiCodeAnalyzerController {
     @Query('githubToken') githubToken: string,
     @Query('codePath') codePath: string,
   ) {
+    let files;
     try {
       this.logger.log(
         `Received request for ${analysisType} diagram generation. Repo url: ${repoUrl}. Path: ${codePath}`,
@@ -36,7 +37,6 @@ export class AiCodeAnalyzerController {
       if (!githubToken) {
         throw new BadRequestException('Github token is required');
       }
-      let files;
       try {
         files = await this.githubService.getFilesFromRepo(
           repoUrl,
@@ -103,6 +103,10 @@ export class AiCodeAnalyzerController {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+    } finally {
+      if (files) {
+        await this.analyzerService.cleanupFiles(files);
+      }
     }
   }
 
@@ -113,6 +117,7 @@ export class AiCodeAnalyzerController {
     @Query('githubToken') githubToken?: string,
     @Query('codePath') codePath?: string,
   ) {
+    let files;
     try {
       if (!question) {
         throw new BadRequestException('Question is required');
@@ -125,7 +130,6 @@ export class AiCodeAnalyzerController {
         throw new BadRequestException('Github token is required');
       }
 
-      let files;
       try {
         files = await this.githubService.getFilesFromRepo(
           repoUrl,
@@ -186,6 +190,10 @@ export class AiCodeAnalyzerController {
           },
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
+      }
+    } finally {
+      if (files) {
+        await this.analyzerService.cleanupFiles(files);
       }
     }
   }

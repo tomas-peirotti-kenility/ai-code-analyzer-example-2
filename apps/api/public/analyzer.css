@@ -1,3 +1,5 @@
+@import url('chat-ui.css');
+
 /* AI Code Analyzer Module Styles */
 
 /* Tabs styling */
@@ -79,10 +81,12 @@
 }
 
 /* Question textarea styling */
+/*
 #codeQuestion {
     resize: vertical;
     min-height: 100px;
 }
+*/
 
 /* Answer section styling */
 #answerContent {
@@ -187,9 +191,11 @@ body.dark-theme .form-text {
 }
 
 /* Send button styling */
+/*
 #sendQuestionBtn i {
     margin-right: 5px;
 }
+*/
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -252,7 +258,7 @@ body.dark-theme .form-text {
 }
 
 .dropzone .dz-preview .dz-details .dz-filename {
-    overflow: hidden;
+    /* overflow: hidden; */
     font-size: 1em;
     white-space: nowrap;
 }
@@ -281,7 +287,7 @@ body.dark-theme .form-text {
 /* Short File List */
 .short-file-list {
     max-height: 5em; /* Adjust as needed */
-    overflow: hidden;
+    /* overflow: hidden; */
     list-style: none;
     padding: 0;
 }
@@ -333,11 +339,13 @@ body.dark-theme .form-text {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     line-height: 1.6;
     word-wrap: break-word;
+    border-radius: 0.5rem;
+    background-color: #f0f0f0;
+    color: black;
 }
 
 /* Ensure code blocks look good */
 .markdown-body pre {
-    background-color: #f6f8fa;
     border-radius: 6px;
     padding: 16px;
     overflow: auto;
@@ -349,13 +357,12 @@ body.dark-theme .form-text {
 /* Add dark mode support if needed */
 @media (prefers-color-scheme: dark) {
     .markdown-body pre {
-        background-color: #282c34;
         color: #abb2bf;
     }
 
     .markdown-body code {
-        background-color: rgba(110, 118, 129, 0.4);
-        color: #e6e6e6;
+        background-color: rgba(60, 64, 67, 0.2);
+        color: #161b22;
     }
 }
 
@@ -365,7 +372,8 @@ body.dark-theme .form-text {
     margin: 0;
     font-size: 85%;
     border-radius: 6px;
-    background-color: rgba(175, 184, 193, 0.2);
+    background-color: rgba(60, 64, 67, 0.2);
+    color: #161b22;
 }
 
 /* Better table styling */
@@ -400,16 +408,46 @@ body.dark-theme .form-text {
     }
 
     .markdown-body table tr {
-        background-color: #0d1117;
+        background-color: #f0f0f0;
         border-top-color: #21262d;
     }
 
     .markdown-body table tr:nth-child(2n) {
-        background-color: #161b22;
+        background-color: #f0f0f0;
     }
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.fullscreen-chat {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(100% - 40px);
+  height: 100%;
+  z-index: 1000;
+  background-color: white; /* Ensure background covers the entire screen */
+  margin: 20px;
+  height: calc(100% - 40px); /* Adjust height for margin */
+}
+
+.chat-input-area {
+  width: 100%;
+}
+
+.alert.alert-danger {
+    width: 100%;
+    max-width: 600px; /* Adjust this value to match the card width */
+    margin: 20px auto;
+}
+
+.message-avatar {
+    margin-right: 8px; /* Adjust spacing between avatar and content */
+}
+
+.message-content {
+    flex: 1; /* Allows the content to take up the remaining space */
 }

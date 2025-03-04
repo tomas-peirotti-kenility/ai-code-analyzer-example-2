@@ -141,34 +141,28 @@ export class GithubService {
       );
 
       // Download and prepare files
-      const downloadedFiles = await this.downloadFiles(
-        files,
-        owner,
-        repo,
-        defaultBranch,
-        token,
-      );
+      const downloadedFiles = await this.downloadFiles(files, token);
 
       // Check if total size exceeds the limit
-      const totalSize = this.calculateTotalSize(downloadedFiles);
+      // const totalSize = this.calculateTotalSize(downloadedFiles);
 
-      if (totalSize > this.MAX_TOTAL_SIZE) {
-        throw new BadRequestException({
-          error: 'Repository size too large',
-          message: `The total size of files (${Math.round(totalSize / 1024)}KB) exceeds the maximum allowed size (${Math.round(this.MAX_TOTAL_SIZE / 1024)}KB). Please select a smaller repository or use a more specific path.`,
-          totalSize,
-          maxSize: this.MAX_TOTAL_SIZE,
-        });
-      }
+      // if (totalSize > this.MAX_TOTAL_SIZE) {
+      //   throw new BadRequestException({
+      //     error: 'Repository size too large',
+      //     message: `The total size of files (${Math.round(totalSize / 1024)}KB) exceeds the maximum allowed size (${Math.round(this.MAX_TOTAL_SIZE / 1024)}KB). Please select a smaller repository or use a more specific path.`,
+      //     totalSize,
+      //     maxSize: this.MAX_TOTAL_SIZE,
+      //   });
+      // }
 
-      if (downloadedFiles.length > this.MAX_FILES) {
-        throw new BadRequestException({
-          error: 'Too many files',
-          message: `The repository contains ${downloadedFiles.length} files, which exceeds the maximum limit of ${this.MAX_FILES} files. Please select a more specific path.`,
-          fileCount: downloadedFiles.length,
-          maxFiles: this.MAX_FILES,
-        });
-      }
+      // if (downloadedFiles.length > this.MAX_FILES) {
+      //   throw new BadRequestException({
+      //     error: 'Too many files',
+      //     message: `The repository contains ${downloadedFiles.length} files, which exceeds the maximum limit of ${this.MAX_FILES} files. Please select a more specific path.`,
+      //     fileCount: downloadedFiles.length,
+      //     maxFiles: this.MAX_FILES,
+      //   });
+      // }
 
       return downloadedFiles;
     } catch (error) {
@@ -240,7 +234,7 @@ export class GithubService {
     path: string,
     branch: string,
     token: string,
-    maxDepth = 3, // Limit recursion depth
+    maxDepth = 5, // Limit recursion depth
     currentDepth = 0,
   ): Promise<any[]> {
     if (currentDepth > maxDepth) {
@@ -252,7 +246,7 @@ export class GithubService {
       // Normalize path
       const normalizedPath = path.startsWith('./') ? path.substring(2) : path;
       const url = `https://api.github.com/repos/${owner}/${repo.replace('.git', '')}/contents/${normalizedPath}`;
-      this.logger.log('Downloading content', url);
+      this.logger.log(`Downloading content: ${url}`);
       const response = await axios.get(url, {
         headers: {
           Authorization: `token ${token}`,
@@ -306,6 +300,9 @@ export class GithubService {
    */
   private isValidFileType(filename: string): boolean {
     const ext = path.extname(filename).toLowerCase();
+    if (filename.includes('-lock')) {
+      return false;
+    }
     const validExtensions = [
       '.js',
       '.jsx',
@@ -342,12 +339,15 @@ export class GithubService {
    */
   private async downloadFiles(
     files: any[],
-    owner: string,
-    repo: string,
-    branch: string,
     token: string,
   ): Promise<
-    Array<{ originalname: string; path: string; content: string; size: number }>
+    Array<{
+      originalname: string;
+      path: string;
+      content: string;
+      size: number;
+      filename: string;
+    }>
   > {
     const uploadPath = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(uploadPath)) {
@@ -358,22 +358,40 @@ export class GithubService {
 
     for (const file of files) {
       try {
+        // Determine if this is a JSON file
+        const isJsonFile = file.name.toLowerCase().endsWith('.json');
+
+        // For JSON files, we need to use responseType: 'text' to prevent automatic parsing
         const response = await axios.get(file.download_url, {
           headers: {
             Authorization: `token ${token}`,
           },
+          ...(isJsonFile ? { responseType: 'text' } : {}),
         });
 
-        const content = response.data;
+        // Handle the content based on the file type and response
+        let content = response.data;
+
+        // If content is an object (not a string), stringify it
+        if (typeof content === 'object' && content !== null) {
+          content = JSON.stringify(content, null, 2);
+        }
+
         const filePath = path.join(uploadPath, `${Date.now()}-${file.name}`);
 
+        // Write the content to a file
         fs.writeFileSync(filePath, content);
+
+        // For consistency, ensure content is always a string for our returned object
+        const contentStr =
+          typeof content === 'string' ? content : content.toString();
 
         downloadedFiles.push({
           originalname: file.path,
           path: filePath,
-          content,
-          size: Buffer.byteLength(content, 'utf8'),
+          content: contentStr,
+          size: Buffer.byteLength(contentStr, 'utf8'),
+          filename: filePath,
         });
       } catch (error) {
         this.logger.error(

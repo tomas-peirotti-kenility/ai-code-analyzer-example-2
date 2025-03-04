@@ -597,4 +597,30 @@ export class AiCodeAnalyzerService {
 
     return JSON.stringify(context, null, 2);
   }
+
+  async cleanupFiles(
+    files: {
+      originalname: string;
+      path: string;
+      content: string;
+      filename: string;
+    }[],
+  ): Promise<void> {
+    try {
+      this.logger.log(`Deleting ${files?.length} files...`);
+      for (const file of files) {
+        if (fs.existsSync(file.filename)) {
+          fs.unlinkSync(file.filename);
+        } else {
+          this.logger.warn(`File not found, cannot delete: ${file.filename}`);
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error cleaning up files: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
 }
