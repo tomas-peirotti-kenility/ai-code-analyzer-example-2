@@ -1,0 +1,95 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/mongodb": [
+        "libs/mongodb/src"
+      ],
+      "@app/mongodb/*": [
+        "libs/mongodb/src/*"
+      ],
+      "@app/core-services": [
+        "libs/core-services/src"
+      ],
+      "@app/core-services/*": [
+        "libs/core-services/src/*"
+      ],
+      "@app/aws": [
+        "libs/aws/src"
+      ],
+      "@app/aws/*": [
+        "libs/aws/src/*"
+      ],
+      "@app/redis": [
+        "libs/redis/src"
+      ],
+      "@app/redis/*": [
+        "libs/redis/src/*"
+      ],
+      "@app/pipe": [
+        "libs/utils/pipe"
+      ],
+      "@app/pipe/*": [
+        "libs/utils/pipe/*"
+      ],
+      "@app/customDecorator": [
+        "libs/utils/customDecorator"
+      ],
+      "@app/customDecorator/*": [
+        "libs/utils/customDecorator/*"
+      ],
+      "@app/encryption": [
+        "libs/encryption/src"
+      ],
+      "@app/encryption/*": [
+        "libs/encryption/src/*"
+      ],
+      "@app/generic-response-dto": [
+        "libs/generic-response-dto/src"
+      ],
+      "@app/generic-response-dto/*": [
+        "libs/generic-response-dto/src/*"
+      ],
+      "@app/translate": [
+        "libs/translate/src"
+      ],
+      "@app/translate/*": [
+        "libs/translate/src/*"
+      ],
+      "@app/sendgrid": [
+        "libs/sendgrid/src"
+      ],
+      "@app/sendgrid/*": [
+        "libs/sendgrid/src/*"
+      ],
+      "@app/openai": [
+        "libs/openai/src"
+      ],
+      "@app/openai/*": [
+        "libs/openai/src/*"
+      ],
+      "@app/embedding": [
+        "libs/embedding/src"
+      ],
+      "@app/embedding/*": [
+        "libs/embedding/src/*"
+      ]
+    }
+  }
+}

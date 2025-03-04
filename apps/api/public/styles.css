@@ -1,0 +1,8 @@
+/* You can add any additional styles here */
+.text-muted-foreground {
+    color: #6b7280; /* Replace with your muted text color */
+}
+
+body.dark .text-muted-foreground {
+    color: #a0a0a0; /* Dark theme muted text color */
+}

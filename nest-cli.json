@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/api/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/api/tsconfig.app.json",
+    "assets": [
+      {
+        "include": "../public/**/*",
+        "outDir": "dist/apps/public"
+      }
+    ]
+  },
+  "monorepo": true,
+  "root": "apps/api",
+  "projects": {
+    "aiva-playground-api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "mongodb": {
+      "type": "library",
+      "root": "libs/mongodb",
+      "entryFile": "index",
+      "sourceRoot": "libs/mongodb/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mongodb/tsconfig.lib.json"
+      }
+    },
+    "aws": {
+      "type": "library",
+      "root": "libs/aws",
+      "entryFile": "index",
+      "sourceRoot": "libs/aws/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/aws/tsconfig.lib.json"
+      }
+    },
+    "redis": {
+      "type": "library",
+      "root": "libs/redis",
+      "entryFile": "index",
+      "sourceRoot": "libs/redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/redis/tsconfig.lib.json"
+      }
+    },
+    "sendgrid": {
+      "type": "library",
+      "root": "libs/sendgrid",
+      "entryFile": "index",
+      "sourceRoot": "libs/sendgrid/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/sendgrid/tsconfig.lib.json"
+      }
+    }
+  }
+}

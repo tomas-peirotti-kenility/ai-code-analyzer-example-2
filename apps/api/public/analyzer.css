@@ -1,0 +1,415 @@
+/* AI Code Analyzer Module Styles */
+
+/* Tabs styling */
+.nav-tabs .nav-link {
+    color: #495057;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom-color: #0d6efd;
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link i {
+    margin-right: 5px;
+}
+
+/* Mermaid diagram container */
+.mermaid-diagram {
+    overflow: auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    min-height: 300px;
+    width: 100%;
+    max-height: 600px;
+}
+
+/* Ensure SVG diagram fits in container */
+.mermaid-diagram svg {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Selected files list styling */
+#selectedFilesList {
+    padding-left: 20px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+#selectedFilesList li {
+    margin-bottom: 3px;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+#loadingIndicator {
+    animation: pulse 1.5s infinite;
+}
+
+/* Diagram code pre formatting */
+#diagramCode {
+    font-family: monospace;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Connection status indicator */
+#analyzerConnectionStatus {
+    transition: background-color 0.3s ease;
+}
+
+#analyzerConnectionStatus.bg-success {
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { background-color: #198754; }
+    50% { background-color: #157347; }
+    100% { background-color: #198754; }
+}
+
+/* Question textarea styling */
+#codeQuestion {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Answer section styling */
+#answerContent {
+    line-height: 1.6;
+}
+
+#answerContent pre {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#answerContent code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* GitHub repository form styling */
+#repoUrl.is-valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+#repoUrl.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Dark theme overrides */
+:root {
+    --bg-primary: #1a1b1e;
+    --bg-secondary: #2a2b2e;
+    --bg-tertiary: #3a3b3e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #4a5af7;
+    --border: #404246;
+}
+
+body.dark-theme .nav-tabs .nav-link {
+    color: var(--text-secondary);
+}
+
+body.dark-theme .nav-tabs .nav-link.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: var(--bg-secondary);
+}
+
+body.dark-theme .tab-content {
+    background-color: var(--bg-secondary);
+}
+
+body.dark-theme .mermaid-diagram {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+body.dark-theme #diagramCode {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary);
+}
+
+body.dark-theme #answerContent pre {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary);
+}
+
+/* Mermaid dark theme adjustments */
+body.dark-theme .mermaid svg {
+    background-color: var(--bg-secondary);
+}
+
+body.dark-theme .mermaid text {
+    fill: var(--text-primary) !important;
+}
+
+body.dark-theme .mermaid .node rect,
+body.dark-theme .mermaid .node circle,
+body.dark-theme .mermaid .node polygon,
+body.dark-theme .mermaid .node path {
+    stroke: var(--border) !important;
+}
+
+body.dark-theme .mermaid .edge path {
+    stroke: var(--text-secondary) !important;
+}
+
+/* Make sure the file input is visible and properly styled in dark mode */
+body.dark-theme input[type="file"] {
+    color: var(--text-primary);
+}
+
+body.dark-theme .form-text {
+    color: var(--text-secondary);
+}
+
+/* Send button styling */
+#sendQuestionBtn i {
+    margin-right: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    #analysisType,
+    #githubAnalysisType {
+        font-size: 0.9rem;
+    }
+
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Add any additional styles here */
+.card {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    padding: 1rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.card-description {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Dropzone styles */
+.dropzone {
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    background: white;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+}
+
+.dropzone .dz-message {
+    color: #777;
+    font-size: 1.2em;
+}
+
+.dropzone .dz-preview .dz-details .dz-filename {
+    overflow: hidden;
+    font-size: 1em;
+    white-space: nowrap;
+}
+
+/* Drop Zone */
+#dropZone {
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#dropZone.dragover {
+    background: #e9ecef;
+    border-color: #0d6efd;
+}
+
+/* Github Connect */
+.text-muted-foreground {
+    color: #6b7280; /* Replace with your muted text color */
+}
+
+/* Short File List */
+.short-file-list {
+    max-height: 5em; /* Adjust as needed */
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+}
+
+/* Scrollable File List */
+.scrollable-file-list {
+    max-height: 8em; /* Adjust as needed */
+    overflow-y: auto;
+    list-style: none;
+    padding: 0 10px; /* Add some padding for better readability */
+    border: 1px solid #ddd; /* Add a border to visually separate the list */
+    border-radius: 5px; /* Match the card's border-radius */
+}
+
+/* Style the scrollbar */
+.scrollable-file-list::-webkit-scrollbar {
+    width: 8px; /* Adjust scrollbar width */
+}
+
+/* Track */
+.scrollable-file-list::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Color of the tracking area */
+    border-radius: 10px; /* Round the corners */
+}
+
+/* Handle */
+.scrollable-file-list::-webkit-scrollbar-thumb {
+    background: #888; /* Color of the scroll thumb */
+    border-radius: 10px; /* Round the corners */
+}
+
+/* Handle on hover */
+.scrollable-file-list::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darken the scroll thumb on hover */
+}
+
+.nav-tabs .nav-link:not(.active) {
+    color: #6c757d; /* Bootstrap's default muted text color */
+}
+
+.nav-tabs .nav-link:not(.active):hover {
+    color: #495057; /* Darker gray on hover for better UX */
+}
+
+/* Add this to your analyzer.css file or inside a <style> tag in your HTML */
+
+/* Adjust the markdown body to fit your design */
+.markdown-body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* Ensure code blocks look good */
+.markdown-body pre {
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    padding: 16px;
+    overflow: auto;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 85%;
+    line-height: 1.45;
+}
+
+/* Add dark mode support if needed */
+@media (prefers-color-scheme: dark) {
+    .markdown-body pre {
+        background-color: #282c34;
+        color: #abb2bf;
+    }
+
+    .markdown-body code {
+        background-color: rgba(110, 118, 129, 0.4);
+        color: #e6e6e6;
+    }
+}
+
+/* Style for inline code */
+.markdown-body code:not([class*="language-"]) {
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    border-radius: 6px;
+    background-color: rgba(175, 184, 193, 0.2);
+}
+
+/* Better table styling */
+.markdown-body table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+    padding: 6px 13px;
+    border: 1px solid #d0d7de;
+}
+
+.markdown-body table tr {
+    background-color: #ffffff;
+    border-top: 1px solid #d8dee4;
+}
+
+.markdown-body table tr:nth-child(2n) {
+    background-color: #f6f8fa;
+}
+
+/* Dark mode for tables */
+@media (prefers-color-scheme: dark) {
+    .markdown-body table th,
+    .markdown-body table td {
+        border-color: #30363d;
+    }
+
+    .markdown-body table tr {
+        background-color: #0d1117;
+        border-top-color: #21262d;
+    }
+
+    .markdown-body table tr:nth-child(2n) {
+        background-color: #161b22;
+    }
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

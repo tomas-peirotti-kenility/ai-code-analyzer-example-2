@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIVA Playground - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1b1e;
+            --bg-secondary: #2a2b2e;
+            --bg-tertiary: #3a3b3e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #4a5af7;
+            --border: #404246;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-control {
+            background-color: var(--bg-tertiary);
+            border-color: var(--border);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus {
+            background-color: var(--bg-tertiary);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #3545f5;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h2 class="text-center mb-4">AIVA Playground</h2>
+    <form id="loginForm">
+        <div class="mb-3">
+            <label for="accessKey" class="form-label">Access Key</label>
+            <input type="password" class="form-control" id="accessKey" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <div id="errorMessage" class="error-message text-center"></div>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="/v1/ui-config.js"></script>
+<script>
+    // Env vars.
+    const API_URL = window.APP_CONFIG.API_URL;
+
+    const errorMessage = document.getElementById('errorMessage');
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const accessKey = document.getElementById('accessKey').value;
+
+        try {
+            const response = await fetch(`${API_URL}/playground/validate-key`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ accessKey })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Invalid access key');
+            }
+
+            sessionStorage.setItem('accessKey', accessKey);
+            window.location.href = 'playground.html';
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+        }
+    });
+
+    window.addEventListener('load', function() {
+        if (sessionStorage.getItem('accessKey')) {
+            window.location.href = 'playground.html';
+        }
+    });
+</script>
+</body>
+</html>

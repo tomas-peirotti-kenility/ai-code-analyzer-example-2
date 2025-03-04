@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Code Analyzer</title>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
+    rel="stylesheet">
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+        rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/analyzer.css">
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900">
+
+<div class="flex flex-col min-h-screen">
+  <header
+    class="sticky top-0 z-10 border-b bg-white dark:bg-gray-800 dark:border-gray-700">
+    <div class="container flex h-16 items-center justify-between px-4">
+      <div class="flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+            <path d="m16 18 6-6-6-6" />
+            <path d="M8 6l-6 6 6 6" />
+          </svg>
+          <span class="font-semibold text-gray-800 dark:text-white">CodeAnalyzer</span>
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="backToRepoBtn"
+                class="hidden bg-transparent hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 border-transparent hover:border-transparent rounded dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
+            <path d="M19 12H6M12 5l-7 7 7 7" />
+          </svg>
+          Back to Repository
+        </button>
+      </div>
+    </div>
+  </header>
+  <main class="flex-grow">
+    <div class="flex-1 container py-6 px-4 md:py-12">
+      <div class="grid gap-6">
+        <div class="flex flex-col items-center text-center space-y-2 mb-2">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Analyze GitHub Repositories</h1>
+          <p class="text-muted-foreground max-w-[600px] text-gray-600 dark:text-gray-300">
+            Connect with GitHub to analyze your repositories and generate visualizations
+          </p>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert alert-danger d-none" id="errorAlert" role="alert">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <hr>
+        <p id="errorMessage" class="mb-0"></p>
+      </div>
+
+      <!-- Select Repository Section -->
+      <div id="repoSection" class="max-w-3xl mx-auto w-full">
+        <div class="card">
+          <div class="card-body">
+            <!-- GitHub Repository Section -->
+            <div id="githubConnectSection"
+                class="flex flex-col items-center justify-center py-8 space-y-4">
+              <div class="flex justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-github h-16 w-16 text-muted-foreground"
+                    data-darkreader-inline-stroke=""
+                    style="--darkreader-inline-stroke: currentColor;">
+                  <path
+                    d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                  </path>
+                  <path d="M9 18c-4.51 2-5-2-7-2">
+                  </path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-medium">Connect with GitHub</h3>
+              <p class="text-sm text-muted-foreground text-center max-w-md">
+                Link your GitHub account to analyze
+                repositories directly.
+              </p>
+              <button id="connectGithubBtn"
+                      class="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-github mr-2 h-4 w-4"
+                    data-darkreader-inline-stroke=""
+                    style="--darkreader-inline-stroke: currentColor;">
+                  <path
+                    d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                  </path>
+                  <path d="M9 18c-4.51 2-5-2-7-2" />
+                </svg>
+                Connect GitHub Account
+              </button>
+            </div>
+
+            <div id="githubRepoSection" class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="lucide lucide-github h-5 w-5">
+                    <path
+                      d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                    <path d="M9 18c-4.51 2-5-2-7-2" />
+                  </svg>
+                  <span class="font-medium">GitHub Connected</span>
+                </div>
+                <button id="logout-btn"
+                        class="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
+                  Disconnect
+                </button>
+              </div>
+
+              <div class="flex gap-2">
+                <div class="flex-1">
+                  <label for="repoSelect" class="form-label">Select Repository</label>
+                  <select id="repoSelect" class="form-select">
+                    <option value="">Select a repository</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mt-3" id="analysisTypeSection">
+                <label for="analysisType" class="form-label">Analysis Type</label>
+                <select id="analysisType" class="form-select">
+                  <option value="sequence">Sequence Diagram</option>
+                  <option value="classdiagram">Class Diagram</option>
+                </select>
+              </div>
+
+              <div class="mt-3">
+                <label for="codePath" class="form-label">Code Path (e.g., ./src)</label>
+                <input type="text" class="form-control" id="codePath" placeholder="./src" value="./src">
+              </div>
+
+              <div class="flex justify-end pt-4">
+                <button type="submit" id="analyzeRepoBtn"
+                        class="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
+                  Analyze Repository
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagram Section -->
+      <div id="analysisSection"
+          class="hidden grid gap-6 md:grid-cols-[1fr_350px] lg:grid-cols-[1fr_400px]">
+        <div class="card mb-4 d-none" id="resultsCard">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Analysis Results</h5>
+            <button id="downloadDiagramBtn"
+                    class="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
+              <i class="bi bi-download mr-2"></i> Download Diagram
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="mermaidContainer" class="w-full aspect-[4/3] border rounded-md">
+            </div>
+            <div class="accordion mt-3" id="analysisDetails">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button"
+                          data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                          aria-expanded="false" aria-controls="collapseOne">
+                    Diagram Code
+                  </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse"
+                    data-bs-parent="#analysisDetails">
+                  <div class="accordion-body">
+                    <pre id="diagramCode" class="p-3 bg-light rounded"></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ask About Code Section -->
+      <div id="askAboutCodeSection" class="card mb-4 d-none">
+        <div class="card-header">
+          <h5 class="mb-0">Ask About Your Code</h5>
+        </div>
+        <div class="card-body">
+          <form id="questionForm">
+            <div class="mb-3">
+              <label for="codeQuestion" class="form-label">What would
+                you like to know about the code?</label>
+              <textarea class="form-control" id="codeQuestion" rows="3"
+                        placeholder="e.g., What does this code do? Explain the main functionality."></textarea>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" id="sendQuestionBtn" disabled
+                      class="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded inline-flex items-center">
+                <i class="bi bi-chat-dots mr-2"></i> Ask
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center my-4 d-none">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Analyzing code, please wait...</p>
+        </div>
+
+        <!-- Answer Section -->
+        <div class="card mb-4 d-none" id="answerCard">
+          <div class="card-header">
+            <h5 class="mb-0">Code Explanation</h5>
+          </div>
+          <div class="card-body">
+            <div id="answerContent" class="markdown-body p-3"></div>
+          </div>
+        </div>  
+      </div>
+    </div>
+  </main>
+  <footer class="border-t py-6 md:py-0 bg-white dark:bg-gray-800 dark:border-gray-700">
+    <div
+      class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+      <p class="text-sm text-muted-foreground text-gray-600 dark:text-gray-300">
+        &copy; 2025 CodeAnalyzer. All rights reserved.
+      </p>
+      <div class="flex gap-4">
+        <a href="#"
+           class="text-sm text-muted-foreground hover:underline underline-offset-4 text-gray-600 dark:text-gray-300">
+          Terms
+        </a>
+        <a href="#"
+           class="text-sm text-muted-foreground hover:underline underline-offset-4 text-gray-600 dark:text-gray-300">
+          Privacy
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.2.3/mermaid.min.js"></script>
+<script src="/v1/ui-config.js"></script>
+<script src="/analyzer.js"></script>
+</body>
+
+</html>
