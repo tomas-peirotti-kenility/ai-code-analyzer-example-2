@@ -47,6 +47,7 @@ export class GithubService {
       );
 
       if (!tokenResponse.data.access_token) {
+        this.logger.error(tokenResponse.data?.error_description);
         throw new BadRequestException('Failed to obtain GitHub access token');
       }
 
@@ -121,7 +122,7 @@ export class GithubService {
   async getFilesFromRepo(
     repoUrl: string,
     token: string,
-    codePath: string = './src',
+    codePath: string = 'src/',
   ): Promise<any[]> {
     try {
       // Parse repository information

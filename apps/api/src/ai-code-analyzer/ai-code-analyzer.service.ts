@@ -15,6 +15,7 @@ import {
 import { generateSequenceDiagram } from './diagrams-generator/sequence-diagram-generator';
 import { generateClassDiagram } from './diagrams-generator/class-diagram-generator';
 import { Project, SyntaxKind } from 'ts-morph';
+import { CacheService } from '../cache/cache.service';
 
 // Token estimation constants
 const TOKENS_PER_CHAR = 0.25; // Rough estimate - 4 chars per token
@@ -25,7 +26,10 @@ export class AiCodeAnalyzerService {
   private readonly logger = new Logger(AiCodeAnalyzerService.name);
   private readonly openai: OpenAI;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private cacheService: CacheService,
+  ) {
     // Initialize OpenAI client
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (!apiKey) {
@@ -85,17 +89,29 @@ export class AiCodeAnalyzerService {
    */
   async answerQuestionFromFiles(
     question: string,
-    files: Multer.File[],
+    files: Multer.File[] | null,
+    repoUrl: string,
+    codePath: string,
+    codeContext?: string,
+    uploadedFile?: { name: string; content: string },
   ): Promise<string> {
     this.logger.log(`Received question: ${question}`);
     try {
-      // Extract code context using ts-morph
-      const codeContext = await this.extractCodeContext(files);
+      // Retrieve code context
+      let context = await this.retrieveCodeContext(
+        files,
+        repoUrl,
+        codePath,
+        codeContext,
+      );
 
-      this.logger.log(`Code context extracted.`);
+      // Add uploaded file content to context
+      if (uploadedFile) {
+        context += `\nUploaded File: ${uploadedFile.name}\n${uploadedFile.content}`;
+      }
 
       // Check total token count
-      const estimatedTokens = this.estimateTokenCountByText(codeContext);
+      const estimatedTokens = this.estimateTokenCountByText(context);
       this.logger.log(`Estimated tokens: ${estimatedTokens}`);
 
       if (estimatedTokens > MAX_TOKENS_INPUT) {
@@ -108,7 +124,8 @@ export class AiCodeAnalyzerService {
       }
 
       // Generate prompt for the question
-      const prompt = this.generateQuestionPrompt(question, codeContext);
+      const prompt = this.generateQuestionPrompt(question, context);
+      this.logger.log(`Generated prompt for question: ${question}`);
 
       // Call OpenAI API
       return await this.generateWithOpenAI(prompt);
@@ -124,6 +141,49 @@ export class AiCodeAnalyzerService {
         'Failed to answer question about code',
       );
     }
+  }
+
+  private async retrieveCodeContext(
+    files: Multer.File[] | null,
+    repoUrl: string,
+    codePath: string,
+    codeContext?: string,
+  ): Promise<string> {
+    const cacheKey = this.cacheService.generateKey(
+      repoUrl,
+      codePath,
+      'questions',
+    );
+
+    if (codeContext) {
+      this.logger.log(`Code context provided.`);
+      return codeContext;
+    }
+
+    let context = this.cacheService.get<string>(cacheKey);
+
+    if (!context) {
+      this.logger.log(`Code context not found in cache, extracting...`);
+      if (!files) {
+        throw new BadRequestException(
+          'No files provided and code context not found in cache.',
+        );
+      }
+      context = await this.extractCodeContext(files);
+
+      (context += files.reduce((acc, file) => {
+        if (file.originalname.endsWith('.json')) {
+          acc += `\nConfiguration File: ${file.originalname}\n${file.content}`;
+        }
+        return acc;
+      }, '')),
+        this.cacheService.set(cacheKey, context);
+      this.logger.log(`Code context extracted and cached.`);
+    } else {
+      this.logger.log(`Code context retrieved from cache.`);
+    }
+
+    return context;
   }
 
   /**
@@ -551,7 +611,6 @@ export class AiCodeAnalyzerService {
       const classes = sourceFile.getClasses().map((c) => {
         const extendsClause = c.getExtends();
         const baseClass = extendsClause ? extendsClause.getText() : null;
-
         const implementsClauses = c.getImplements();
         const implementedInterfaces = implementsClauses.map((i) => i.getText());
 
@@ -622,5 +681,10 @@ export class AiCodeAnalyzerService {
       );
       throw error;
     }
+  }
+
+  replaceFilePathsWithNames(answer: string): string {
+    const uploadDir = __dirname.replace('/dist/apps/api', '') + '/uploads/';
+    return answer.replace(new RegExp(uploadDir, 'g'), '').replace(/\d+-/g, '');
   }
 }

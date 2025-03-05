@@ -4,6 +4,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AiCodeAnalyzerController } from './ai-code-analyzer.controller';
 import { AiCodeAnalyzerService } from './ai-code-analyzer.service';
 import { GithubModule } from '../github/github.module';
+import { CacheService } from '../cache/cache.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { GithubModule } from '../github/github.module';
     GithubModule,
   ],
   controllers: [AiCodeAnalyzerController],
-  providers: [AiCodeAnalyzerService],
-  exports: [AiCodeAnalyzerService],
+  providers: [AiCodeAnalyzerService, CacheService],
+  exports: [AiCodeAnalyzerService, CacheService],
 })
 export class AiCodeAnalyzerModule {}

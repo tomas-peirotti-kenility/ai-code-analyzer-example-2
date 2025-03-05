@@ -366,6 +366,11 @@ body.dark-theme .form-text {
     }
 }
 
+.markdown-body .highlight pre, .markdown-body pre {
+    background-color: rgba(60, 64, 67, 0.2);
+    color: #fff;
+}
+
 /* Style for inline code */
 .markdown-body code:not([class*="language-"]) {
     padding: 0.2em 0.4em;
@@ -450,4 +455,20 @@ button:disabled {
 
 .message-content {
     flex: 1; /* Allows the content to take up the remaining space */
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: #0d6efd;
+    border: 1px solid #0d6efd;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.secondary-button:hover {
+    background-color: #e9ecef;
+    color: #0a58ca;
+    border-color: #0a58ca;
 }

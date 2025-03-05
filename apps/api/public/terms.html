@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+<div class="flex flex-col min-h-screen">
+    <header class="border-b bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div class="container flex items-center justify-between h-16 px-4 md:px-6">
+            <a href="/" class="flex items-center gap-2 font-semibold text-gray-800 dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="h-6 w-6">
+                    <path d="m16 18 6-6-6-6"/>
+                    <path d="M8 6l-6 6 6 6"/>
+                </svg>
+                <span>Code Analyzer</span>
+            </a>
+            <button onclick="window.history.back()" class="bg-transparent hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M19 12H6M12 5l-7 7 7 7"/></svg>
+                Back
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        <div class="container px-4 md:px-6 py-8 markdown-body">
+            <h1 class="text-3xl font-bold mb-4">Terms of Service</h1>
+
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing or using CodeAnalyzer, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.</p>
+
+            <h2>2. Description of Service</h2>
+            <p>CodeAnalyzer provides AI-powered code analysis and visualization tools to help developers understand and improve their codebases.</p>
+
+            <h2>3. User Conduct</h2>
+            <p>You agree not to use the Service for any unlawful purpose or in any way that could harm, disrupt, or impair the Service or any other user's experience.</p>
+
+            <h2>4. Intellectual Property</h2>
+            <p>The Service and its original content, features, and functionality are owned by CodeAnalyzer and are protected by copyright, trademark, and other intellectual property laws.</p>
+
+            <h2>5. Disclaimer of Warranty</h2>
+            <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.</p>
+
+            <h2>6. Limitation of Liability</h2>
+            <p>IN NO EVENT SHALL CodeAnalyzer BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SERVICE.</p>
+
+            <h2>7. Governing Law</h2>
+            <p>These Terms shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.</p>
+
+            <h2>8. Changes to Terms</h2>
+            <p>CodeAnalyzer reserves the right to modify or replace these Terms at any time. Your continued use of the Service after any such changes constitutes your acceptance of the new Terms.</p>
+        </div>
+    </main>
+
+    <footer class="border-t py-6 md:py-0 bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+            <p class="text-sm text-muted-foreground text-gray-600 dark:text-gray-300">
+                &copy; 2025 CodeAnalyzer. All rights reserved.
+            </p>
+            <div class="flex gap-4">
+                <a href="terms.html" class="text-sm text-muted-foreground hover:underline underline-offset-4 text-gray-600 dark:text-gray-300">
+                    Terms
+                </a>
+                <a href="privacy.html" class="text-sm text-muted-foreground hover:underline underline-offset-4 text-gray-600 dark:text-gray-300">
+                    Privacy
+                </a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="/v1/ui-config.js"></script>
+</body>
+</html>

@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
-import { TerminusModule } from '@nestjs/terminus';
-import { LoggerModule } from 'nestjs-pino';
+import {Module} from '@nestjs/common';
+import {TerminusModule} from '@nestjs/terminus';
+import {LoggerModule} from 'nestjs-pino';
 import AppService from '../src/app.service';
 import AppController from '../src/app.controller';
-import { PlaygroundModule } from './playground/playground.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { AiCodeAnalyzerModule } from './ai-code-analyzer/ai-code-analyzer.module';
-import { GithubModule } from './github/github.module';
+import {PlaygroundModule} from './playground/playground.module';
+import {ServeStaticModule} from '@nestjs/serve-static';
+import {join} from 'path';
+import {AiCodeAnalyzerModule} from './ai-code-analyzer/ai-code-analyzer.module';
+import {GithubModule} from './github/github.module';
+import {CacheService} from './cache/cache.service';
 
 @Module({
   imports: [
@@ -38,6 +39,6 @@ import { GithubModule } from './github/github.module';
     GithubModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CacheService],
 })
 export class AppModule {}

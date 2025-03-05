@@ -31,6 +31,7 @@ let questionForm;
 let codeQuestion;
 let answerCard;
 let sendQuestionBtn;
+let uploadedFile;
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeElements();
@@ -184,6 +185,7 @@ function initializeMermaid() {
  */
 function showError(message, title = 'Error') {
   console.error(`Error: ${message}`);
+  errorMessage = document.getElementById('errorMessage');
   if (errorMessage) {
     // Format message for HTML display
     if (typeof message === 'object') {
@@ -344,13 +346,19 @@ function handleQuestionSubmit(event) {
   }
 
   // Get the question from the input
-  const questionText = codeQuestion.value.trim();
+  let questionText = codeQuestion.value.trim();
 
   // Append the user's message to the chat container
-  appendUserMessage(questionText);
+  let messageContent = questionText;
+  if (uploadedFile) {
+    messageContent += `</br></br><i class="bi bi-file-earmark-check mr-2"></i> ${uploadedFile.name}`;
+  }
+  appendUserMessage(messageContent);
 
   // Clear the input field
   codeQuestion.value = '';
+  uploadFileLabel.innerHTML = '<i class="bi bi-upload mr-2"></i>';
+  codeFile.value = '';
 
   // Append the "Analyzing code..." message from the bot
   const analyzingMessage = appendAnalyzingMessage();
@@ -364,20 +372,43 @@ function handleQuestionSubmit(event) {
   const githubToken = sessionStorage.getItem('githubToken');
   const codePath = currentRepository.codePath;
 
+  // Extract relevant information from XML file if it is an XML
+  let extractedInfo = '';
+  if (uploadedFile && uploadedFile.name.endsWith('.xml')) {
+    extractedInfo = extractInfoFromXML(uploadedFile.content);
+
+    questionText += `\n\nExtracted info from XML file:\n${extractedInfo}`;
+    uploadedFile = null;
+  }
+
   const params = new URLSearchParams({
     repoUrl,
     githubToken,
     codePath,
-    question: questionText, // Use the question text from the input
+    question: questionText,
   });
+
+  const requestBody = {
+    question: questionText,
+    repoUrl: repoUrl,
+    codePath: codePath,
+    uploadedFile: uploadedFile
+      ? {
+          name: uploadedFile.name,
+          content: extractedInfo ? extractedInfo : uploadedFile.content,
+        }
+      : null,
+  };
 
   fetch(
     `${window.APP_CONFIG.API_URL}/ai-code-analyzer/questions?${params.toString()}`,
     {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         API_KEY: sessionStorage.getItem('accessKey'),
       },
+      body: JSON.stringify(requestBody),
     },
   )
     .then(handleApiResponse)
@@ -401,6 +432,50 @@ function handleQuestionSubmit(event) {
     .finally(() => {
       // hideLoading();
     });
+}
+
+/**
+ * Extracts relevant information from a Jira issue XML file
+ */
+function extractInfoFromXML(xmlContent) {
+  try {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
+
+    // Verificar si el XML se parseó correctamente
+    if (xmlDoc.querySelector('parsererror')) {
+      console.error('Error parsing XML');
+      return null;
+    }
+
+    const item = xmlDoc.querySelector('item');
+    if (!item) {
+      console.error('No <item> element found in XML');
+      return null;
+    }
+
+    const extractedInfo = {
+      Title: item?.querySelector('title')?.textContent.trim() || '',
+      Key: item?.querySelector('key')?.textContent.trim() || '',
+      Summary: item?.querySelector('summary')?.textContent.trim() || '',
+      Description: item?.querySelector('description')?.textContent.trim() || '',
+    };
+
+    // Mostrar resultado
+    console.log('Extracted info:', extractedInfo);
+
+    const info = `Jira Issue:
+      Title: ${extractedInfo.Title}
+      Key: ${extractedInfo.Key}
+      Summary: ${extractedInfo.Summary}
+      Description: ${extractedInfo.Description}`;
+
+    console.log('Extracted info:', info);
+    return info;
+  } catch (error) {
+    console.error('Error parsing XML:', error);
+    return ''; // Return empty string in case of error
+  }
 }
 
 /**
@@ -578,11 +653,12 @@ function renderMermaidDiagram(mermaidCode) {
             mermaidContainer.innerHTML = svg;
           }
 
-          const resultsCard = document.getElementById('resultsCard');
           if (resultsCard) resultsCard.classList.remove('d-none');
         })
         .catch((error) => {
           console.error('Mermaid rendering error:', error);
+          if (resultsCard) resultsCard.classList.add('d-none');
+          if (repoSection) repoSection.classList.remove('hidden');
           showError(
             'Failed to render diagram: ' + error.message ||
               'Mermaid syntax error',
@@ -590,12 +666,16 @@ function renderMermaidDiagram(mermaidCode) {
         });
     } catch (error) {
       console.error('Mermaid rendering error:', error);
+      if (resultsCard) resultsCard.classList.add('d-none');
+      if (repoSection) repoSection.classList.remove('hidden');
       showError(
         'Failed to render diagram: ' + error.message ||
           'Mermaid rendering error',
       );
     }
   } else {
+    if (resultsCard) resultsCard.classList.add('d-none');
+    if (repoSection) repoSection.classList.remove('hidden');
     console.error('Mermaid library not available');
     showError('Mermaid library not loaded. Cannot render diagram.');
   }
@@ -902,3 +982,24 @@ function MessageAvatar({ type }) {
     </div>
   `;
 }
+
+const uploadFileLabel = document.getElementById('uploadFileLabel');
+const codeFile = document.getElementById('codeFile');
+
+codeFile.addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      uploadedFile = {
+        name: file.name,
+        content: e.target.result,
+      };
+      uploadFileLabel.innerHTML = `<i class="bi bi-file-earmark-check mr-2"></i>`;
+    };
+    reader.readAsText(file);
+  } else {
+    uploadedFile = null;
+    uploadFileLabel.innerHTML = '<i class="bi bi-upload mr-2"></i>';
+  }
+});
